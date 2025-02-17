@@ -218,7 +218,7 @@ function getHint() {
             remainingLetters.splice(randomIndex, 1);
         }
 
-        let hint = word.split('').map(letter => revealedLetters.includes(letter) ? letter : '_').join('');
+        let hint = word.split('').map(letter => revealedLetters.includes(letter) ? letter : '_').join(' ');
         feedbackDisplay.textContent = hint;
         hintPercentage = Math.min(hintPercentage + 25, 100);
     }
