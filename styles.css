@@ -33,3 +33,106 @@ button {
     margin: 5px;
     cursor: pointer;
 }
+
+.reset-menu {
+    position: absolute;
+    right: 20px;
+    top: 60px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+    min-width: 250px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.reset-menu.visible {
+    display: block;
+}
+
+.reset-menu h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.completed-levels {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.level-button {
+    text-align: left;
+    padding: 10px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.level-button:hover {
+    background: #e5e5e5;
+}
+
+#reset-button {
+    width: 100%;
+    margin-top: 10px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#reset-button:hover {
+    background: #ff2222;
+}
+
+.level-button.completed-level {
+    background: #e0f2e0;
+    border-color: #4CAF50;
+}
+
+.level-button.current-level {
+    background: #e8f0fe;
+    border-color: #4285f4;
+    font-weight: bold;
+}
+
+.level-button.available-level {
+    background: #fff;
+    border-color: #ddd;
+}
+
+.level-button.locked-level {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.reset-menu {
+    position: absolute;
+    right: 20px;
+    top: 60px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+    min-width: 250px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.reset-menu.visible {
+    display: block;
+}
