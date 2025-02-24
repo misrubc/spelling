@@ -1,147 +1,8 @@
-const levels = [
-  [
-    "holiday",
-    "banana",
-    "silver",
-    "pattern",
-    "abdomen",
-    "bicycle",
-    "hungry",
-    "candle",
-    "music",
-    "animal",
-    "family",
-    "window",
-    "teacher",
-    "locker",
-    "tomato",
-    "turtle",
-    "cousin",
-    "grateful",
-    "garden",
-    "whisper"
-  ],
-  [
-    "license",
-    "fountain",
-    "vision",
-    "danger",
-    "minister",
-    "vacuum",
-    "popular",
-    "tomorrow",
-    "trouble",
-    "marvelous",
-    "shoulder",
-    "bargain",
-    "freckle",
-    "average",
-    "courage",
-    "castle",
-    "napkin",
-    "beverage",
-    "machine",
-    "puzzle"
-  ],
-  [
-    "acquire",
-    "membrane",
-    "cylinder",
-    "sailor",
-    "analysis",
-    "whistle",
-    "recognize",
-    "kingdom",
-    "ornament",
-    "portion",
-    "battery",
-    "familiar",
-    "harvest",
-    "raisins",
-    "customer",
-    "inspire",
-    "liberty",
-    "curtain",
-    "recycle",
-    "tragedy"
-  ],
-  [
-    "multiply",
-    "vertical",
-    "subtract",
-    "caterpillar",
-    "evidence",
-    "hospital",
-    "treasure",
-    "festival",
-    "whenever",
-    "mystery",
-    "cafeteria",
-    "confident",
-    "campaign",
-    "boundary",
-    "observer",
-    "terrific",
-    "language",
-    "feather",
-    "scissors",
-    "original"
-  ],
-  [
-    "interview",
-    "questionnaire",
-    "hospitality",
-    "volcano",
-    "occasion",
-    "parallel",
-    "diameter",
-    "uniform",
-    "journey",
-    "fraction",
-    "vacation",
-    "narrative",
-    "warning",
-    "calendar",
-    "quantity",
-    "strategy",
-    "laboratory",
-    "discovery",
-    "thunderstorm",
-    "elevator"
-  ],
-  [
-    "adjust",
-    "activity",
-    "ancient",
-    "already",
-    "abandon",
-    "accurate",
-    "alphabet",
-    "ambition",
-    "admire",
-    "appetite",
-    "achieve",
-    "apology",
-    "absolute",
-    "ancient", // appears twice? We'll see if the code snippet did that or if it's just a glitch.
-    // Let’s show the final verified code output to avoid confusion. 
-  ],
-];
 
-// Word definitions (placeholders)
-const definitions = {
-    "holiday": "A day of festivity or recreation when no work is done",
-    "banana": "A long curved fruit with a yellow peel",
-    "silver": "A shiny gray-white precious metal",
-    "pattern": "A repeated decorative design or sequence",
-    "abdomen": "The part of the body containing the digestive organs",
-    "bicycle": "A vehicle with two wheels powered by pedals",
-    "hungry": "Feeling or showing the need for food",
-    "candle": "A cylinder of wax with a central wick that provides light when burning",
-    "music": "Vocal or instrumental sounds combined to produce beauty of form",
-    "animal": "A living organism that feeds on organic matter",
-    // Add more definitions as needed...
-};
+let loadedLevels = {};
+const WORDS_PER_LEVEL = 20;
+const TOTAL_LEVELS = wordBank.getTotalLevels(WORDS_PER_LEVEL);
+
 
 let completedLevels = JSON.parse(localStorage.getItem('completedLevels')) || {};
 let currentLevel = parseInt(localStorage.getItem('currentLevel')) || 0;
@@ -170,9 +31,53 @@ const resetMenu = document.getElementById('reset-menu');
 const resetButton = document.getElementById('reset-button');
 
 const synth = window.speechSynthesis;
+function loadLevelData(levelNumber) {
+    console.log('Loading level:', levelNumber);
+    if (!loadedLevels[levelNumber]) {
+        const levelWords = wordBank.getLevelWords(levelNumber);
+        console.log('Level words:', levelWords);
+        if (!levelWords) {
+            console.error(`No words available for level ${levelNumber}`);
+            return null;
+        }
+        loadedLevels[levelNumber] = levelWords;
+    }
+    console.log('Loaded level data:', loadedLevels[levelNumber]);
+    return loadedLevels[levelNumber];
+}
+// Function to load level data
+function loadLevel() {
+    console.log('Loading level, current level:', currentLevel);
+    progressByLevel[currentLevel] = currentIndex;
+    currentIndex = progressByLevel[currentLevel] || 0;
+    
+    const levelData = loadLevelData(currentLevel);
+    console.log('Level data loaded:', levelData);
+    if (!levelData) {
+        console.error('Failed to load level data');
+        return;
+    }
+    
+    hintPercentage = 0;
+    revealedLetters = '';
+    updateWordDisplay();
+    updateScoreDisplay();
+    updateLevelDisplay();
+    updateProgressBar();
+    speakWord(levelData[currentIndex]);
+    
+    if (currentLevel < TOTAL_LEVELS - 1) {
+        setTimeout(() => {
+            loadLevelData(currentLevel + 1);
+        }, 0);
+    }
+    
+    saveProgress();
+}
 
-function speakWord(word) {
-    const utterance = new SpeechSynthesisUtterance(word);
+function speakWord(wordObj) {
+    console.log('Speaking word:', wordObj);
+    const utterance = new SpeechSynthesisUtterance(wordObj.word);
     synth.speak(utterance);
     userInput.focus();
 }
@@ -191,29 +96,12 @@ function updateLevelDisplay() {
 }
 
 function updateProgressBar() {
-    const progressPercentage = ((currentIndex + 1) / levels[currentLevel].length) * 100;
+    const progressPercentage = ((currentIndex + 1) / WORDS_PER_LEVEL) * 100;
     progressBar.style.width = `${progressPercentage}%`;
     progressBar.textContent = `${progressPercentage.toFixed(0)}%`;
 }
 
-function loadLevel() {
-    // Save current progress before switching levels
-    progressByLevel[currentLevel] = currentIndex;
-    
-    // Load saved progress for the new level
-    currentIndex = progressByLevel[currentLevel] || 0;
-    
-    hintPercentage = 0;
-    revealedLetters = '';
-    updateWordDisplay();
-    updateScoreDisplay();
-    updateLevelDisplay();
-    updateProgressBar();
-    speakWord(levels[currentLevel][currentIndex]);
-    
-    // Save the updated state
-    saveProgress();
-}
+
 
 function showFeedback(isCorrect) {
     feedbackDisplay.textContent = isCorrect ? 'Correct' : 'Incorrect';
@@ -236,7 +124,8 @@ function saveProgress() {
 }
 
 function getHint() {
-    const word = levels[currentLevel][currentIndex];
+    const currentWordObj = loadedLevels[currentLevel][currentIndex];
+    const word = currentWordObj.word;
     let remainingLetters = word.split('').filter(letter => !revealedLetters.includes(letter));
     let lettersToReveal = Math.ceil(word.length * 0.25);
 
@@ -254,22 +143,54 @@ function getHint() {
         hintPercentage = Math.min(hintPercentage + 25, 100);
     }
 
-    // Deduct 1 point for using hint
     score = Math.max(0, score - 1);
     updateScoreDisplay();
     saveProgress();
 }
 
 function getDefinition() {
-    const word = levels[currentLevel][currentIndex];
-    const definition = definitions[word] || "Definition not available";
+    const currentWordObj = loadedLevels[currentLevel][currentIndex];
+    const definition = currentWordObj.definition || "Definition not available";
+    const usage = currentWordObj.usage || "Usage example not available";
+    const audioUS = currentWordObj.audioUS;
     
-    // Toggle definition display
-    if (feedbackDisplay.textContent === definition) {
+    // If the feedback is already showing, clear it
+    if (feedbackDisplay.textContent.includes(definition)) {
         feedbackDisplay.textContent = '';
-    } else {
-        feedbackDisplay.textContent = definition;
+        return;
     }
+    
+    // Create HTML content with CSS classes
+    let content = `
+        <div class="definition-container">
+            <p class="definition-text">${definition}</p>
+            <p class="usage-text">"${usage}"</p>
+    `;
+    
+    // Add audio player if audio URL is available
+    if (audioUS) {
+        content += `
+            <p class="audio-container">
+                <button class="audio-button" onclick="playAudio('${audioUS}')">
+                    🔊 Play
+                </button>
+            </p>
+        `;
+    }
+    
+    content += '</div>';
+    
+    feedbackDisplay.innerHTML = content;
+}
+
+function playAudio(audioUrl) {
+    const audio = new Audio(audioUrl);
+    audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+        // Fallback to speech synthesis if audio fails
+        const currentWordObj = loadedLevels[currentLevel][currentIndex];
+        speakWord(currentWordObj);
+    });
 }
 
 function resetProgress() {
@@ -287,7 +208,8 @@ function resetProgress() {
 }
 
 playButton.addEventListener('click', () => {
-    speakWord(levels[currentLevel][currentIndex]);
+    const currentWordObj = loadedLevels[currentLevel][currentIndex];
+    speakWord(currentWordObj);
 });
 
 submitButton.addEventListener('click', handleSubmit);
@@ -308,17 +230,15 @@ function updateSettingsMenu() {
     const levelsSection = document.createElement('div');
     levelsSection.classList.add('completed-levels');
     
-    // Get the highest level user has reached
     highestLevelReached = Math.max(
         highestLevelReached,
         currentLevel,
         ...Object.keys(completedLevels).map(Number)
     );
     
-    // Save current progress before displaying menu
     progressByLevel[currentLevel] = currentIndex;
     
-    for (let i = 0; i < levels.length; i++) {
+    for (let i = 0; i < TOTAL_LEVELS; i++) {
         const levelButton = document.createElement('button');
         levelButton.classList.add('level-button');
         
@@ -327,7 +247,7 @@ function updateSettingsMenu() {
             levelButton.textContent = `Level ${i + 1} - Completed ${completionDate}`;
             levelButton.classList.add('completed-level');
         } else if (i === currentLevel) {
-            const progress = Math.round((currentIndex / levels[currentLevel].length) * 100);
+            const progress = Math.round((currentIndex / WORDS_PER_LEVEL) * 100);
             levelButton.textContent = `Level ${i + 1} - In Progress (${progress}%)`;
             levelButton.classList.add('current-level');
         } else if (i > highestLevelReached) {
@@ -336,30 +256,24 @@ function updateSettingsMenu() {
             levelButton.disabled = true;
         } else {
             const savedProgress = progressByLevel[i] || 0;
-            const progressPercent = Math.round((savedProgress / levels[i].length) * 100);
+            const progressPercent = Math.round((savedProgress / WORDS_PER_LEVEL) * 100);
             levelButton.textContent = `Level ${i + 1} - In Progress (${progressPercent}%)`;
             levelButton.classList.add('available-level');
         }
         
         levelButton.addEventListener('click', () => {
             if (!levelButton.disabled) {
-                // Save progress of current level before switching
                 progressByLevel[currentLevel] = currentIndex;
-                
-                // Switch to selected level
                 currentLevel = i;
                 currentIndex = progressByLevel[i] || 0;
-                
                 loadLevel();
                 resetMenu.classList.remove('visible');
-                
-                // Save the updated state
                 saveProgress();
             }
         });
         
         levelsSection.appendChild(levelButton);
-    };
+    }
     
     resetMenu.appendChild(levelsSection);
 
@@ -379,36 +293,36 @@ function handleClickOutside(event) {
         }
     }
 }
+
 function handleSubmit() {
     const userAnswer = userInput.value.trim().toLowerCase();
-    const currentWord = levels[currentLevel][currentIndex];
-    if (userAnswer === currentWord) {
+    const currentWordObj = loadedLevels[currentLevel][currentIndex];
+    
+    if (userAnswer === currentWordObj.word.toLowerCase()) {
         score += 10;
         showFeedback(true);
         currentIndex++;
         hintPercentage = 0;
         revealedLetters = '';
         
-        // Update progress for current level
         progressByLevel[currentLevel] = currentIndex;
         
-        if (currentIndex >= levels[currentLevel].length) {
-            // Record level completion
+        if (currentIndex >= WORDS_PER_LEVEL) {
             completedLevels[currentLevel] = new Date().toISOString();
             localStorage.setItem('completedLevels', JSON.stringify(completedLevels));
             
             currentLevel++;
-            if (currentLevel >= levels.length) {
+            if (currentLevel >= TOTAL_LEVELS) {
                 alert('Congratulations! You have completed all levels.');
-                currentLevel = levels.length - 1;
-                currentIndex = levels[currentLevel].length - 1;
+                currentLevel = TOTAL_LEVELS - 1;
+                currentIndex = WORDS_PER_LEVEL - 1;
             } else {
                 highestLevelReached = Math.max(highestLevelReached, currentLevel);
                 currentIndex = progressByLevel[currentLevel] || 0;
                 loadLevel();
             }
         } else {
-            speakWord(levels[currentLevel][currentIndex]);
+            speakWord(loadedLevels[currentLevel][currentIndex]);
         }
     } else {
         score -= 2;
@@ -420,25 +334,28 @@ function handleSubmit() {
     saveProgress();
 }
 
+
 backButton.addEventListener('click', () => {
     if (currentIndex > 0) {
         currentIndex--;
         hintPercentage = 0;
         revealedLetters = '';
         feedbackDisplay.textContent = ''; 
-        speakWord(levels[currentLevel][currentIndex]);
+        const currentWordObj = loadedLevels[currentLevel][currentIndex];
+        speakWord(currentWordObj);
     }
     saveProgress();
     updateProgressBar();
 });
 
 forwardButton.addEventListener('click', () => {
-    if (currentIndex < levels[currentLevel].length - 1) {
+    if (currentIndex < WORDS_PER_LEVEL - 1) {
         currentIndex++;
         hintPercentage = 0;
         revealedLetters = '';
         feedbackDisplay.textContent = ''; 
-        speakWord(levels[currentLevel][currentIndex]);
+        const currentWordObj = loadedLevels[currentLevel][currentIndex];
+        speakWord(currentWordObj);
     }
     saveProgress();
     updateProgressBar();
@@ -484,6 +401,9 @@ window.addEventListener('load', () => {
     if (currentIndex === 0 && currentLevel === 0 && score === 0) {
         loadLevel();
     } else {
-        speakWord(levels[currentLevel][currentIndex]);
+        const levelData = loadLevelData(currentLevel);
+        if (levelData) {
+            speakWord(levelData[currentIndex]);
+        }
     }
 });
